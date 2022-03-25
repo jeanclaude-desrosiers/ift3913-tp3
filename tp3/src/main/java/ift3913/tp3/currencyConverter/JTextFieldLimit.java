@@ -1,4 +1,4 @@
-package currencyConverter;
+package ift3913.tp3.currencyConverter;
 
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;

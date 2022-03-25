@@ -1,7 +1,7 @@
 package ift3913.tp3.currencyConverter;
 
-import currencyConverter.Currency;
-import currencyConverter.MainWindow;
+import ift3913.tp3.currencyConverter.Currency;
+import ift3913.tp3.currencyConverter.MainWindow;
 import java.util.ArrayList;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.AfterAll;

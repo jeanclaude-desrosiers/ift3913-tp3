@@ -1,6 +1,6 @@
 package ift3913.tp3.currencyConverter;
 
-import currencyConverter.Currency;
+import ift3913.tp3.currencyConverter.Currency;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
