@@ -3,24 +3,27 @@ package ift3913.tp3.currencyConverter;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.util.ArrayList;
 
 class MainWindowTest {
 
-    static MainWindow mainWindow;
     static ArrayList<Currency> currencies;
 
     @BeforeAll
     static void setUp() {
-        mainWindow = new MainWindow();
         init();
     }
 
     /** Tests boîte noire **/
 
     @Test
-    void convert() {
-//        mainWindow.convert();
+    void convert_lorsqueCurrency1EtCurrency2SontDansLaListe_etMontantEntre0et10000_retourneMontantConvertie() {
+        Double montantConvertie = MainWindow.convert(
+                "US Dollar", "Canadian Dollar", currencies, 600d);
+
+        assertEquals(montantConvertie, 600d * 1.25, 0.001);
     }
 
     static void init() {

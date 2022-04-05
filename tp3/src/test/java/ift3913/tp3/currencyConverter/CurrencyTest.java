@@ -9,8 +9,8 @@ class CurrencyTest {
     /** Tests boîte noire **/
 
     /**
-     * Ne fait pas de sens de tester les frontières de la valeur d'échange car ce n'est pas dans les spécifications.
-     * Le client pourrait vouloir que des valeurs d'échange soit plus petit que 0.
+     * Ne fait pas de sens de tester les frontières extérieures de la valeur d'échange,
+     * car ce n'est pas dans les spécifications.
      */
 
     /** Test entre frontières **/
