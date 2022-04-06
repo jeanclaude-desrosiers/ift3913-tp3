@@ -6,11 +6,11 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class CurrencyTest {
 
-    /** Tests boîte noire **/
-
     /**
-     * Ne fait pas de sens de tester les frontières extérieures de la valeur d'échange,
-     * car ce n'est pas dans les spécifications.
+     * On pose l'hypothèse qu'une valeur extérieure aux frontières (min ou max) devrait lancer une exception.
+     *
+     * Pas de sens de faire des tests à boîte blanche, car la fonction est relativement courte et
+     * ne suit qu'un seul chemin.
      */
 
     /** Test entre frontières **/
@@ -34,18 +34,16 @@ class CurrencyTest {
         assertEquals(montantConvertie, 10000d * 0.93, 0.001);
     }
 
-    /** Devrait retourné une erreur car le montant doit être entre 0 et 1000 **/
+    /** Test hors frontière min -> Devrait retourné une erreur car le montant doit être entre 0 et 1000 **/
     @Test
     void convert_montantAConvertirPlusPetitQueZero_retourneErreur() {
         assertThrows(IllegalArgumentException.class, () -> Currency.convert(-1d, 0.93));
     }
 
-    /** Devrait retourné une erreur car le montant doit être entre 0 et 10000 **/
+    /** Test hors frontière max ->Devrait retourné une erreur car le montant doit être entre 0 et 10000 **/
     @Test
     void convert_montantAConvertirPlusGrandQueMille_retourneErreur() {
         assertThrows(IllegalArgumentException.class, () -> Currency.convert(10001d, 0.93));
     }
-
-    /** Tests boîte blanche **/
 
 }
