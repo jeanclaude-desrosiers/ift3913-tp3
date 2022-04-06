@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.ArrayList;
+import java.util.NoSuchElementException;
+import java.util.Objects;
 
 class MainWindowTest {
 
@@ -13,74 +15,153 @@ class MainWindowTest {
 
     @BeforeAll
     static void setUp() {
-        init();
+        currencies = Currency.init();
     }
 
     /** Tests boîte noire **/
 
     @Test
-    void convert_lorsqueCurrency1EtCurrency2SontDansLaListe_etMontantEntre0et10000_retourneMontantConvertie() {
+    void convert_lorsqueCurrency1EtCurrency2Valides_etMontantEntre0et10000_retourneMontantConvertie() {
         Double montantConvertie = MainWindow.convert(
-                "US Dollar", "Canadian Dollar", currencies, 600d);
+                "US Dollar", "Euro", currencies, 600d);
 
-        assertEquals(montantConvertie, 600d * 1.25, 0.001);
+        Double valeurEchange = trouverValeurDechange("US Dollar", "EUR");
+
+        assertEquals(montantConvertie, 600d * valeurEchange, 0.001);
     }
 
-    static void init() {
-        currencies = new ArrayList<Currency>();
-        currencies.add( new Currency("US Dollar", "USD") );
-        currencies.add( new Currency("Euro", "EUR") );
-        currencies.add( new Currency("British Pound", "GBP") );
-        currencies.add( new Currency("Swiss Franc", "CHF") );
+    @Test
+    void convert_lorsqueCurrency1EtCurrency2Valides_etMontantFrontiere0_retourneMontantConvertie() {
+        Double montantConvertie = MainWindow.convert(
+                "US Dollar", "Euro", currencies, 0d);
 
-        for (Integer i =0; i < currencies.size(); i++) {
-            Currency currencyExistante = currencies.get(i);
-            currencyExistante.defaultValues();
-            currencyExistante.getExchangeValues().remove("CNY");
-            currencyExistante.getExchangeValues().remove("JPY");
+        Double valeurEchange = trouverValeurDechange("US Dollar", "EUR");
 
-            if (currencyExistante.getShortName().equals("USD")) {
-                currencyExistante.setExchangeValues("INR", 76.00);
-                currencyExistante.setExchangeValues("AUD", 1.33);
-                currencyExistante.setExchangeValues("CAD", 1.25);
-            }
-            if (currencyExistante.getShortName().equals("EUR")) {
-                currencyExistante.setExchangeValues("INR", 83.94);
-                currencyExistante.setExchangeValues("AUD", 1.47);
-                currencyExistante.setExchangeValues("CAD", 1.38);
-            }
-            if (currencyExistante.getShortName().equals("GBP")) {
-                currencyExistante.setExchangeValues("INR", 99.66);
-                currencyExistante.setExchangeValues("AUD", 1.75);
-                currencyExistante.setExchangeValues("CAD", 1.64);
-            }
-            if (currencyExistante.getShortName().equals("CHF")) {
-                currencyExistante.setExchangeValues("INR", 82.09);
-                currencyExistante.setExchangeValues("AUD", 1.44);
-                currencyExistante.setExchangeValues("CAD", 1.35);
+        assertEquals(montantConvertie, 600d * valeurEchange, 0.001);
+    }
+
+    @Test
+    void convert_lorsqueCurrency1EtCurrency2Valides_etMontantFrontiere10000_retourneMontantConvertie() {
+        Double montantConvertie = MainWindow.convert(
+                "US Dollar", "Euro", currencies, 10000d);
+
+        Double valeurEchange = trouverValeurDechange("US Dollar", "EUR");
+
+        assertEquals(montantConvertie, 600d * valeurEchange, 0.001);
+    }
+
+    @Test
+    void convert_lorsqueCurrency1EtCurrency2Valides_etMontantInvalideFrontiereMin_retourneException() {
+        assertThrows(IllegalArgumentException.class, () -> MainWindow.convert(
+                "US Dollar", "Euro", currencies, -1d));
+    }
+
+    @Test
+    void convert_lorsqueCurrency1EtCurrency2Valides_etMontantInvalideFrontiereMax_retourneException() {
+        assertThrows(IllegalArgumentException.class, () -> MainWindow.convert(
+                "US Dollar", "Euro", currencies, 10000d));
+    }
+
+    @Test
+    void convert_lorsqueCurrency1EtCurrency2Valides_etMontantInvalidePlusPetit_retourneException() {
+        assertThrows(IllegalArgumentException.class, () -> MainWindow.convert(
+                "US Dollar", "Euro", currencies, -110d));
+    }
+
+    @Test
+    void convert_lorsqueCurrency1EtCurrency2SontDansLaListe_etMontantInvalidePlusGrand_retourneException() {
+        assertThrows(IllegalArgumentException.class, () -> MainWindow.convert(
+                "US Dollar", "Euro", currencies, 68000d));
+    }
+
+    @Test
+    void convert_lorsqueCurrency1ValideEtCurrency2Invalide_etMontantValide_retourneException() {
+        assertThrows(IllegalArgumentException.class, () -> MainWindow.convert(
+                "US Dollar", "Canadian Dollar", currencies, 600d));
+    }
+
+    @Test
+    void convert_lorsqueCurrency2ValideEtCurrency1Invalide_etMontantValide_retourneException() {
+        assertThrows(IllegalArgumentException.class, () -> MainWindow.convert(
+                "Canadian Dollar", "Euro", currencies, 600d));
+    }
+
+    @Test
+    void convert_lorsqueCurrency1EtCurrency2Invalides_etMontantValide_retourneException() {
+        assertThrows(IllegalArgumentException.class, () -> MainWindow.convert(
+                "Canadian Dollar", "Indian Rupee", currencies, 600d));
+    }
+
+    @Test
+    void convert_lorsqueCurrency1EtCurrency2Null_etMontantValide_retourneException() {
+        assertThrows(IllegalArgumentException.class, () -> MainWindow.convert(
+                null, null, currencies, 600d));
+    }
+
+    @Test
+    void convert_lorsqueCurrency1EtCurrency2Empty_etMontantValide_retourneException() {
+        assertThrows(IllegalArgumentException.class, () -> MainWindow.convert(
+                "", "", currencies, 600d));
+    }
+
+    @Test
+    void convert_lorsqueListeCurrenciesVide_etMontantValide_retourneException() {
+        assertThrows(NoSuchElementException.class, () -> MainWindow.convert(
+                "US Dollar", "Euro", new ArrayList<>(), 600d));
+    }
+
+    /** Tests boîte blanche **/
+
+    @Test
+    void convert_lorsqueCurrency1EtCurrency2Valides_retourneMontantConvertie() {
+        Double montantConvertie = MainWindow.convert(
+                "US Dollar", "Euro", currencies, 600d);
+
+        Double valeurEchange = trouverValeurDechange("US Dollar", "EUR");
+
+        assertEquals(montantConvertie, 600d * valeurEchange, 0.001);
+    }
+
+    @Test
+    void convert_lorsqueListeCurrenciesVideEtShortNameCurrency2Null_retourneException() {
+        assertThrows(NoSuchElementException.class, () -> MainWindow.convert(
+                "US Dollar", "Euro", new ArrayList<>(), 600d));
+    }
+
+    @Test
+    void convert_lorsqueCurrency1ValideEtCurrency2Invalide_retourneException() {
+        assertThrows(IllegalArgumentException.class, () -> MainWindow.convert(
+                "US Dollar", "CanadianDollar", currencies, 600d));
+    }
+
+    @Test
+    void convert_lorsqueCurrency1EtCurrency2Valides_etShortNameCurrency2Invalide_retourneException() {
+        ArrayList<Currency> currenciesModifie = Currency.init();
+
+        for (Currency currency : currenciesModifie) {
+            if (Objects.equals(currency.getName(), "CanadianDollar")) {
+                currency.setShortName(null);
             }
         }
+        assertThrows(IllegalArgumentException.class, () -> MainWindow.convert(
+                "US Dollar", "CanadianDollar", currenciesModifie, 600d));
+    }
 
-        Currency currency = new Currency("Canadian Dollar", "CAD");
-        currency.setExchangeValues("USD", 0.80);
-        currency.setExchangeValues("EUR", 0.72);
-        currency.setExchangeValues("GBP", 0.61);
-        currency.setExchangeValues("CHF", 0.74);
-        currency.setExchangeValues("INR", 60.69);
-        currency.setExchangeValues("AUD", 1.06);
-        currency = new Currency("Indian Rupee", "INR");
-        currency.setExchangeValues("USD", 0.013);
-        currency.setExchangeValues("EUR", 0.012);
-        currency.setExchangeValues("GBP", 0.010);
-        currency.setExchangeValues("CHF", 0.012);
-        currency.setExchangeValues("CAD", 0.016);
-        currency.setExchangeValues("AUD", 0.018);
-        currency = new Currency("Australian Dollar", "AUD");
-        currency.setExchangeValues("USD", 0.75);
-        currency.setExchangeValues("EUR", 0.68);
-        currency.setExchangeValues("GBP", 0.57);
-        currency.setExchangeValues("CHF", 0.69);
-        currency.setExchangeValues("INR", 56.92);
-        currency.setExchangeValues("CAD", 0.94);
+    @Test
+    void convert_lorsqueCurrency2ValideEtCurrency1Invalide_retourneException() {
+        assertThrows(IllegalArgumentException.class, () -> MainWindow.convert(
+                "CanadianDollar", "US Dollar", currencies, 600d));
+    }
+
+
+    private Double trouverValeurDechange(String currency1, String shortNameCurrency2) {
+        Double valeurEchange = 0d;
+        for (Currency currency : currencies) {
+            if (Objects.equals(currency.getName(), currency1)) {
+                valeurEchange = currency.getExchangeValues().get(shortNameCurrency2);
+                break;
+            }
+        }
+        return valeurEchange;
     }
 }
