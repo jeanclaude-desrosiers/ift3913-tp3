@@ -1,6 +1,5 @@
-package test;
+package ift3913.tp3.currencyConverter;
 
-import currencyConverter.Currency;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

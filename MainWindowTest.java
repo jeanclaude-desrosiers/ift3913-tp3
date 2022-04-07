@@ -1,7 +1,5 @@
-package test;
+package ift3913.tp3.currencyConverter;
 
-import currencyConverter.Currency;
-import currencyConverter.MainWindow;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 

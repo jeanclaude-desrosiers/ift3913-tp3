@@ -1,4 +1,4 @@
-package currencyConverter;
+package ift3913.tp3.currencyConverter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
