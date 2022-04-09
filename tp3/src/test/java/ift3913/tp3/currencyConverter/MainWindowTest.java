@@ -87,7 +87,7 @@ public class MainWindowTest {
                 new Currency("Indian Rupee", "INR"),
                 new Currency("Australian Dollar", "AUD")
         );
-        for(Currency c : correct_currencies) {
+        for (Currency c : correct_currencies) {
             c.defaultValues();
         }
 
@@ -99,7 +99,7 @@ public class MainWindowTest {
                 new Currency("Indian Rupee", "INR"),
                 new Currency("Australian Dollar", "AUD")
         );
-        for(Currency c : correct_currencies_miss_usd) {
+        for (Currency c : correct_currencies_miss_usd) {
             c.defaultValues();
         }
 
@@ -115,25 +115,31 @@ public class MainWindowTest {
 
         for (Object[] currency1_arr : currencies) {
             Currency currency1 = (Currency) currency1_arr[0];
-            Boolean currency1_valid = (Boolean) currency1_arr[1];
+            int currency1_valid = (Boolean) currency1_arr[1] ? 0 : 1;
 
             for (Object[] currency2_arr : currencies) {
                 Currency currency2 = (Currency) currency2_arr[0];
-                Boolean currency2_valid = (Boolean) currency2_arr[1];
+                int currency2_valid = (Boolean) currency2_arr[1] ? 0 : 1;
 
                 for (Object[] currencies_arraylists_arr : currencies_arraylists) {
                     ArrayList<Currency> currency_arraylist
                             = (ArrayList<Currency>) currencies_arraylists_arr[0];
-                    Boolean currency_arraylist_valid
-                            = (Boolean) currencies_arraylists_arr[1];
+                    int currency_arraylist_valid
+                            = (Boolean) currencies_arraylists_arr[1] ? 0 : 1;
 
                     for (Object[] amount_arr : amounts) {
                         Double amount = (Double) amount_arr[0];
-                        Boolean amount_valid = (Boolean) amount_arr[1];
+                        int amount_valid = (Boolean) amount_arr[1] ? 0 : 1;
+
+                        int sum_valid = currency1_valid + currency2_valid
+                                + currency_arraylist_valid + amount_valid;
 
                         Object expectedResult = null;
-                        if (currency1_valid && currency2_valid && amount_valid && currency_arraylist_valid) {
+                        if (sum_valid == 0) {
                             expectedResult = amount * get_exchangeValues(currency1, currency2);
+                        } else if (sum_valid > 1) {
+                            // we only want tests with 1 invalid parameter
+                            continue;
                         }
 
                         arguments.add(Arguments.of(
@@ -156,7 +162,6 @@ public class MainWindowTest {
     public void test_convert_blackbox(String currency1, String currency2, Double amount, ArrayList<Currency> currency_arraylist, Double expectedResult) {
         String expectedMessage = "\nTesting amount=" + amount + " from currency1=" + currency1 + " to currency2=" + currency2 + "\n"
                 + "Should output=" + (expectedResult == null ? "exception" : expectedResult) + "\n";
-        System.out.println(expectedMessage);
 
         if (expectedResult == null) {
             assertThrows(Exception.class, () -> MainWindow.convert(currency1, currency2, currency_arraylist, amount), expectedMessage);
@@ -165,59 +170,55 @@ public class MainWindowTest {
         }
     }
 
-    /**
-     * Tests boîte blanche *
-     */
     @Test
-    public void test_convert_lorsqueCurrency1EtCurrency2Valides_retourneMontantConvertie() {
-        Double montantConvertie = MainWindow.convert(
-                "US Dollar", "Euro", Currency.init(), 600d);
-
-        Double valeurEchange = trouverValeurDechange("US Dollar", "EUR");
-
-        assertEquals(montantConvertie, 600d * valeurEchange, 0.001);
+    public void test_convert_whitebox_TestPremierChemin() {
+        assertThrows(Exception.class, () -> {
+            MainWindow.convert("", "", new ArrayList<>(), 0.);
+        });
     }
 
     @Test
-    public void test_convert_lorsqueListeCurrenciesVideEtShortNameCurrency2Null_retourneException() {
-        assertThrows(NoSuchElementException.class, () -> MainWindow.convert(
-                "US Dollar", "Euro", new ArrayList<>(), 600d));
+    public void test_convert_whitebox_TestDeuxiemeChemin() {
+        Double amount = 42.;
+        String currency1 = "Canadian Dollar";
+        String currency2 = "US Dollar";
+        Double expectedResult = 42.0 * 0.8;
+        String expectedMessage = "\nTesting amount=" + amount + " from currency1=" + currency1 + " to currency2=" + currency2 + "\n"
+                + "Should output=" + expectedResult + "\n";
+        ArrayList<Currency> currency_arraylist = new ArrayList<>();
+        currency_arraylist.add(new Currency("Canadian Dollar", "CAD"));
+        currency_arraylist.add(new Currency("US Dollar", "USD"));
+
+        Double actual = MainWindow.convert("Canadian Dollar", "US Dollar", currency_arraylist, 42.0);
+
+        assertEquals(expectedResult, actual, 0.001, expectedMessage);
     }
 
     @Test
-    public void test_convert_lorsqueCurrency1ValideEtCurrency2Invalide_retourneException() {
-        assertThrows(IllegalArgumentException.class, () -> MainWindow.convert(
-                "US Dollar", "CanadianDollar", Currency.init(), 600d));
+    public void test_convert_whitebox_TestTroisiemeChemin() {
+        ArrayList<Currency> currencies = new ArrayList<>();
+        currencies.add(new Currency("US Dollar", "USD"));
+
+        assertThrows(Exception.class, () -> {
+            MainWindow.convert("Canadian Dollar", "US Dollar", currencies, 42.0);
+        });
     }
 
     @Test
-    public void test_convert_lorsqueCurrency1EtCurrency2Valides_etShortNameCurrency2Invalide_retourneException() {
-        ArrayList<Currency> currenciesModifie = Currency.init();
+    public void test_convert_whitebox_TestQuatriemeChemin() {
+        Double amount = 42.;
+        String currency1 = "Canadian Dollar";
+        String currency2 = "US Dollar";
+        Double expectedResult = 42.0 * 0.8;
+        String expectedMessage = "\nTesting amount=" + amount + " from currency1=" + currency1 + " to currency2=" + currency2 + "\n"
+                + "Should output=" + expectedResult + "\n";
+        ArrayList<Currency> currency_arraylist = new ArrayList<>();
+        currency_arraylist.add(new Currency("US Dollar", "USD"));
+        currency_arraylist.add(new Currency("Canadian Dollar", "CAD"));
 
-        for (Currency currency : currenciesModifie) {
-            if (Objects.equals(currency.getName(), "CanadianDollar")) {
-                currency.setShortName(null);
-            }
-        }
-        assertThrows(IllegalArgumentException.class, () -> MainWindow.convert(
-                "US Dollar", "CanadianDollar", currenciesModifie, 600d));
-    }
+        Double actual = MainWindow.convert("Canadian Dollar", "US Dollar", currency_arraylist, 42.0);
 
-    @Test
-    public void test_convert_lorsqueCurrency2ValideEtCurrency1Invalide_retourneException() {
-        assertThrows(IllegalArgumentException.class, () -> MainWindow.convert(
-                "CanadianDollar", "US Dollar", Currency.init(), 600d));
-    }
-
-    private Double trouverValeurDechange(String currency1, String shortNameCurrency2) {
-        Double valeurEchange = 0d;
-        for (Currency currency : Currency.init()) {
-            if (Objects.equals(currency.getName(), currency1)) {
-                valeurEchange = currency.getExchangeValues().get(shortNameCurrency2);
-                break;
-            }
-        }
-        return valeurEchange;
+        assertEquals(expectedResult, actual, 0.001, expectedMessage);
     }
 
 }
