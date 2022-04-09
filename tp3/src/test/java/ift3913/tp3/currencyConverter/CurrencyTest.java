@@ -1,4 +1,4 @@
-package test;
+package ift3913.tp3.currencyConverter;
 
 import java.util.ArrayList;
 import java.util.stream.Stream;
