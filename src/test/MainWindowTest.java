@@ -21,25 +21,11 @@ import org.junit.jupiter.params.provider.MethodSource;
 public class MainWindowTest {
 
     private static final Object[][] exchangeValues = {
-        {"USD", "USD", 1.0}, // USD -> USD
-        {"USD", "CAD", 1.25}, // USD -> CAD
-        {"USD", "JPY", 123.54}, // USD -> JPY
-        {"USD", "MXN", 20.18}, // USD -> MXN
-
         {"CAD", "CAD", 1.0}, // CAD -> CAD
-        {"CAD", "USD", 0.8}, // CAD -> USD
         {"CAD", "JPY", 98.81}, // CAD -> JPY
-        {"CAD", "MXN", 16.09}, // CAD -> MXN
 
         {"JPY", "JPY", 1.0}, // JPY -> JPY
-        {"JPY", "USD", 0.0081}, // JPY -> USD
         {"JPY", "CAD", 0.010}, // JPY -> CAD
-        {"JPY", "MXN", 0.16}, // JPY -> MXN
-
-        {"MXN", "MXN", 1.0}, // MXN -> MXN
-        {"MXN", "USD", 0.050}, // MXN -> USD
-        {"MXN", "CAD", 0.062}, // MXN -> CAD
-        {"MXN", "JPY", 6.14}, // MXN -> JPY
     };
 
     private static Double get_exchangeValues(Currency from, Currency to) {
@@ -57,12 +43,9 @@ public class MainWindowTest {
     }
 
     private static final Object[][] currencies = {
-        {new Currency("US Dollar", "USD"), true},
         {new Currency("Canadian Dollar", "CAD"), true},
         {new Currency("Japanese Yen", "JPY"), false},
-        {new Currency("Mexican Peso", "MXN"), false},
-        {new Currency("Alpha Beta Currency", "ABC"), false},
-        {new Currency("", "   "), false}
+        {new Currency("Alpha Beta Currency", "ABC"), false}
     };
 
     private static final Object[][] amounts = {
@@ -105,8 +88,7 @@ public class MainWindowTest {
 
         currencies_arraylists = new Object[][]{
             {new ArrayList<>(correct_currencies), true},
-            {new ArrayList<>(correct_currencies_miss_usd), false},
-            {new ArrayList<Currency>(), false}
+            {new ArrayList<>(correct_currencies_miss_usd), false}
         };
     }
 
